@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #0a0a0a;
+  --bone: #f2eee6;
+  --blood: #e53935;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--ink);
+  color: var(--bone);
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--blood);
+  color: var(--ink);
+}
+
+/* ---------- Grunge / film grain overlay (SVG noise) ---------- */
+.noise::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- Scanline sweep ---------- */
+.scanline::before {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 140px;
+  pointer-events: none;
+  z-index: 49;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(242, 238, 230, 0.025),
+    transparent
+  );
+  animation: scanline 9s linear infinite;
+}
+
+/* ---------- Glitch text (data-text mirror layers) ---------- */
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+.glitch::before {
+  color: var(--blood);
+  animation: glitch-a 3.8s infinite steps(1);
+}
+.glitch::after {
+  color: var(--bone);
+  animation: glitch-b 3.8s infinite steps(1);
+}
+@keyframes glitch-a {
+  0%, 91%, 100% { opacity: 0; transform: none; }
+  92% { opacity: 0.8; transform: translate(-4px, 2px); clip-path: inset(15% 0 55% 0); }
+  94% { opacity: 0.8; transform: translate(4px, -2px); clip-path: inset(55% 0 10% 0); }
+  96% { opacity: 0; }
+}
+@keyframes glitch-b {
+  0%, 92%, 100% { opacity: 0; transform: none; }
+  93% { opacity: 0.6; transform: translate(3px, 1px); clip-path: inset(40% 0 30% 0); }
+  95% { opacity: 0.6; transform: translate(-3px, -1px); clip-path: inset(5% 0 75% 0); }
+  97% { opacity: 0; }
+}
+
+/* ---------- Evidence stamp ---------- */
+.stamp {
+  border: 3px solid var(--blood);
+  color: var(--blood);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.12' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0.35'/%3E%3CfeComposite operator='over' in2='SourceGraphic'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' fill='white' filter='url(%23r)'/%3E%3C/svg%3E");
+}
+
+/* ---------- Range slider ---------- */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: #232323;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  background: var(--blood);
+  border: 3px solid var(--ink);
+  outline: 2px solid var(--blood);
+  cursor: pointer;
+  transform: rotate(45deg); /* diamond thumb — part of the show's look */
+  transition: transform 120ms ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: rotate(45deg) scale(1.15);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  background: var(--blood);
+  border: 3px solid var(--ink);
+  outline: 2px solid var(--blood);
+  cursor: pointer;
+  transform: rotate(45deg);
+}
+
+/* ---------- Focus visibility ---------- */
+:focus-visible {
+  outline: 2px solid var(--blood);
+  outline-offset: 3px;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .scanline::before {
+    display: none;
+  }
+}
