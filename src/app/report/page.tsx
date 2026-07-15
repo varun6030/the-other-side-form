@@ -17,7 +17,7 @@ function MeterRow({
   delay,
 }: {
   label: string;
-  value: number; // 0–100 for the bar
+  value: number;
   display: string;
   delay: number;
 }) {
@@ -73,8 +73,16 @@ export default function ReportPage() {
   const report = useMemo(() => buildReport(answers), [answers]);
   const [revealed, setRevealed] = useState(false);
 
+  // Save answers to Google Sheet
   useEffect(() => {
-    // confetti — sparing. one burst, show colors only.
+    fetch("/api/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ answers, report }),
+    }).catch(() => {});
+  }, [answers, report]);
+
+  useEffect(() => {
     const t = setTimeout(() => {
       confetti({
         particleCount: 70,
@@ -88,7 +96,6 @@ export default function ReportPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-5 py-16">
-      {/* header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -133,7 +140,6 @@ export default function ReportPage() {
         <StatRow label="CONFIDENTIALITY LEVEL" value={report.confidentiality} delay={1.05} red />
       </NoiseCard>
 
-      {/* most dangerous answer */}
       {report.mostDangerous && (
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -167,7 +173,6 @@ export default function ReportPage() {
         </motion.div>
       )}
 
-      {/* footer actions */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
