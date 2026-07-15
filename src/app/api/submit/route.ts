@@ -10,9 +10,25 @@ const auth = new google.auth.GoogleAuth({
     client_email: process.env.GOOGLE_CLIENT_EMAIL,
     client_id: process.env.GOOGLE_CLIENT_ID,
   } as any,
+  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
 
+const REQUIRED_ENV_VARS = [
+  "GOOGLE_PROJECT_ID",
+  "GOOGLE_KEY_ID",
+  "GOOGLE_PRIVATE_KEY",
+  "GOOGLE_CLIENT_EMAIL",
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_SHEET_ID",
+];
+
 export async function POST(req: NextRequest) {
+  const missing = REQUIRED_ENV_VARS.filter((name) => !process.env[name]);
+  if (missing.length > 0) {
+    console.error("Missing required env vars for Google Sheets:", missing.join(", "));
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
+  }
+
   const { answers, report } = await req.json();
   const sheets = google.sheets({ version: "v4", auth });
 
@@ -41,7 +57,11 @@ export async function POST(req: NextRequest) {
       requestBody: { values: [row] },
     });
     return NextResponse.json({ success: true });
-  } catch (err) {
+  } catch (err: any) {
+    console.error(
+      "Failed to append row to Google Sheet:",
+      err?.response?.data ?? err?.message ?? err
+    );
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }

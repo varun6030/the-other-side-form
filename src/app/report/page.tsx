@@ -79,7 +79,15 @@ export default function ReportPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ answers, report }),
-    }).catch(() => {});
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          console.error("Failed to submit report to Google Sheet:", res.status, await res.text());
+        }
+      })
+      .catch((err) => {
+        console.error("Error submitting report to Google Sheet:", err);
+      });
   }, [answers, report]);
 
   useEffect(() => {
